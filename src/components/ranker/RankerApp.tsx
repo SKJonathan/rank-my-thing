@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import ListSetup from "@/components/ranker/ListSetup";
 import Compare from "@/components/ranker/Compare";
 import Results from "@/components/ranker/Results";
@@ -32,6 +34,7 @@ interface Props {
 }
 
 export default function RankerApp({ initial, allowResume = false, loadListId = null }: Props) {
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>(initial?.step ?? "setup");
   const [listId, setListId] = useState<string | null>(initial?.listId ?? null);
   const [items, setItems] = useState<Item[]>(initial?.items ?? []);
