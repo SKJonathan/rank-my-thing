@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
 import { toast } from "sonner";
+import { shareDataset } from "@/lib/share";
 
 type Item = { id: string; label: string };
 
@@ -205,6 +206,14 @@ export default function Library() {
 
                       <Button size="sm" variant="secondary" onClick={() => navigate(`/edit/${list.id}`)}>
                         <Pencil className="h-4 w-4" /> Edit
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => shareDataset(list.id, list.title)}
+                      >
+                        <Share2 className="h-4 w-4" /> Share dataset
                       </Button>
 
                       {listResults.map((r, i) => (
