@@ -194,14 +194,14 @@ export default function Library() {
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       {inProgress ? (
-                        <Button size="sm" onClick={() => navigate("/")}>
+                        <Button size="sm" onClick={() => navigate(`/new?resume=1&list=${list.id}`)}>
                           <Play className="h-4 w-4" /> Resume
                         </Button>
-                      ) : listResults.length === 0 ? (
-                        <Button size="sm" onClick={() => navigate("/")}>
-                          <Play className="h-4 w-4" /> Rank now
+                      ) : (
+                        <Button size="sm" onClick={() => navigate(`/new?list=${list.id}`)}>
+                          <Play className="h-4 w-4" /> {listResults.length === 0 ? "Rank now" : "Rank again"}
                         </Button>
-                      ) : null}
+                      )}
 
                       {listResults.map((r, i) => (
                         <div key={r.id} className="flex items-center gap-1">

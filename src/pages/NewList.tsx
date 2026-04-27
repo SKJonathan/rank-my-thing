@@ -6,6 +6,7 @@ import RankerApp from "@/components/ranker/RankerApp";
 const NewList = () => {
   const [params] = useSearchParams();
   const allowResume = params.get("resume") === "1";
+  const loadListId = params.get("list");
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,7 +26,7 @@ const NewList = () => {
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-6 py-12">
-        <RankerApp allowResume={allowResume} />
+        <RankerApp allowResume={allowResume} loadListId={loadListId} />
       </main>
       <footer className="mt-24 border-t border-border">
         <div className="mx-auto max-w-3xl px-6 py-6 text-xs text-muted-foreground">

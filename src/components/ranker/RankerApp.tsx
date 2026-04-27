@@ -28,9 +28,10 @@ interface InitialState {
 interface Props {
   initial?: InitialState;
   allowResume?: boolean;
+  loadListId?: string | null;
 }
 
-export default function RankerApp({ initial, allowResume = false }: Props) {
+export default function RankerApp({ initial, allowResume = false, loadListId = null }: Props) {
   const [step, setStep] = useState<Step>(initial?.step ?? "setup");
   const [listId, setListId] = useState<string | null>(initial?.listId ?? null);
   const [items, setItems] = useState<Item[]>(initial?.items ?? []);
@@ -44,14 +45,53 @@ export default function RankerApp({ initial, allowResume = false }: Props) {
   const [hasOthers, setHasOthers] = useState(false);
   const [resuming, setResuming] = useState(true);
 
-  // On fresh mount (no initial), optionally check for in-progress session to resume
+  // On fresh mount (no initial): optionally load a specific list, or resume the latest in-progress session.
   useEffect(() => {
-    if (initial || !allowResume) {
+    if (initial) {
+      setResuming(false);
+      return;
+    }
+    if (!allowResume && !loadListId) {
       setResuming(false);
       return;
     }
     (async () => {
       const sid = getSessionId();
+
+      if (loadListId) {
+        // Load this specific list, and any in-progress session for it (so we resume mid-rank if possible)
+        const [{ data: list }, { data: session }] = await Promise.all([
+          supabase
+            .from("lists")
+            .select("id, title, description, items")
+            .eq("id", loadListId)
+            .maybeSingle(),
+          supabase
+            .from("ranking_sessions")
+            .select("id, state, completed, updated_at")
+            .eq("session_id", sid)
+            .eq("list_id", loadListId)
+            .eq("completed", false)
+            .order("updated_at", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+        ]);
+        if (list) {
+          setListId(list.id);
+          setItems(list.items as Item[]);
+          setTitle(list.title);
+          setDescription(list.description ?? "");
+          if (session) {
+            setResumeState(session.state as unknown as RankerState);
+            setResumeRowId(session.id);
+          }
+          setStep("compare");
+        }
+        setResuming(false);
+        return;
+      }
+
+      // allowResume path — pick up the most recent unfinished session across any list
       const { data } = await supabase
         .from("ranking_sessions")
         .select("id, list_id, state, completed, lists(title, description, items)")
@@ -72,7 +112,7 @@ export default function RankerApp({ initial, allowResume = false }: Props) {
       }
       setResuming(false);
     })();
-  }, [initial]);
+  }, [initial, allowResume, loadListId]);
 
   // Check for other results on results step
   useEffect(() => {
