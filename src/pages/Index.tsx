@@ -72,18 +72,9 @@ const Dashboard = () => {
   const latestList = latestResult ? lists.find((l) => l.id === latestResult.list_id) : null;
   const resumableList = resumable ? lists.find((l) => l.id === resumable.list_id) : null;
 
-  // Empty state — funnel straight into create
-  if (!loading && lists.length === 0 && !latestResult) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="mx-auto max-w-3xl px-6 py-12">
-          <RankerApp />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  // Empty state — show a friendly intro with a CTA, not the create flow directly.
+  // The create flow lives at /new; clicking the Ranker logo always returns here.
+  const isEmpty = !loading && lists.length === 0 && !latestResult;
 
   return (
     <div className="min-h-screen bg-background">
