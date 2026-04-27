@@ -60,7 +60,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
 
       if (loadListId) {
         // Load this specific list, and any in-progress session for it (so we resume mid-rank if possible)
-        const [{ data: list }, { data: session }] = await Promise.all([
+        const [{ data: list, error: listErr }, { data: session }] = await Promise.all([
           supabase
             .from("lists")
             .select("id, title, description, items")
@@ -81,11 +81,16 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
           setItems(list.items as Item[]);
           setTitle(list.title);
           setDescription(list.description ?? "");
-          if (session) {
+          if (session && session.state) {
             setResumeState(session.state as unknown as RankerState);
             setResumeRowId(session.id);
           }
           setStep("compare");
+        } else {
+          // List not found — surface it instead of dumping the user on the setup form
+          console.warn("[Ranker] list not found", { loadListId, listErr });
+          toast.error("Couldn't load that list — it may have been removed.");
+          navigate("/", { replace: true });
         }
         setResuming(false);
         return;
