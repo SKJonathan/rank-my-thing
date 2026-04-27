@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import SharedResult from "./pages/SharedResult.tsx";
 import Library from "./pages/Library.tsx";
+import NewList from "./pages/NewList.tsx";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ const App = () => (
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/new" element={<NewList />} />
           <Route path="/library" element={<Library />} />
           <Route path="/r/:code" element={<SharedResult />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
