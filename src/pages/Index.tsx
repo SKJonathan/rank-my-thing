@@ -94,14 +94,20 @@ const Dashboard = () => {
             {/* Hero */}
             <section className="space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
-                <Sparkles className="h-3.5 w-3.5" /> Welcome back
+                <Sparkles className="h-3.5 w-3.5" /> {isEmpty ? "Welcome to Ranker" : "Welcome back"}
               </div>
               <h1 className="text-4xl font-bold tracking-tight text-balance md:text-5xl">
                 Sort anything, settle everything.
               </h1>
+              {isEmpty && (
+                <p className="text-muted-foreground text-pretty max-w-xl">
+                  Add a list of things, answer a few "this or that?" questions, and Ranker
+                  works out the final order for you.
+                </p>
+              )}
               <div className="flex flex-wrap gap-2 pt-2">
                 <Button onClick={() => navigate("/new")}>
-                  <Plus className="h-4 w-4" /> New list
+                  <Plus className="h-4 w-4" /> {isEmpty ? "Create your first list" : "New list"}
                 </Button>
                 {resumable && resumableList && (
                   <Button variant="secondary" onClick={() => navigate("/new")}>
