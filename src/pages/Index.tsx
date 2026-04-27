@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Trophy, Library as LibraryIcon, Plus, Play, Eye, ArrowRight, Loader2, Sparkles, Pencil } from "lucide-react";
+import { Trophy, Library as LibraryIcon, Plus, Play, Eye, ArrowRight, Loader2, Sparkles, Pencil, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
+import { shareDataset } from "@/lib/share";
 import RankerApp from "@/components/ranker/RankerApp";
 
 type Item = { id: string; label: string };
@@ -246,6 +247,14 @@ const Dashboard = () => {
                         </Button>
                         <Button size="sm" variant="secondary" onClick={() => navigate(`/edit/${list.id}`)}>
                           <Pencil className="h-3.5 w-3.5" /> Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => shareDataset(list.id, list.title)}
+                          aria-label="Share dataset"
+                        >
+                          <Share2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     </div>

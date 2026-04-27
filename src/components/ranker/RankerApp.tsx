@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
 import { RankerState } from "@/lib/ranker";
 import { Loader2 } from "lucide-react";
+import { shareDataset } from "@/lib/share";
 
 type Item = { id: string; label: string };
 type Step = "setup" | "compare" | "results" | "compareRankings";
@@ -143,6 +144,17 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
     setResumeState(null);
     setResumeRowId(null);
     setStep("compare");
+    // Offer to share the dataset right after creation so they can rank with someone.
+    setTimeout(() => {
+      toast("Want to rank this with someone?", {
+        description: "Share the dataset and you can both rank it at the same time.",
+        action: {
+          label: "Share link",
+          onClick: () => shareDataset(id, t),
+        },
+        duration: 8000,
+      });
+    }, 400);
   };
 
   const handleComplete = (orderedIds: string[]) => {
