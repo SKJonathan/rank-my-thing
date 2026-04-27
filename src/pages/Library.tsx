@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Trophy, ListChecks, Play, Eye, Trash2, Loader2, Share2 } from "lucide-react";
+import { ArrowLeft, Trophy, ListChecks, Play, Eye, Trash2, Loader2, Share2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
@@ -202,6 +202,10 @@ export default function Library() {
                           <Play className="h-4 w-4" /> {listResults.length === 0 ? "Rank now" : "Rank again"}
                         </Button>
                       )}
+
+                      <Button size="sm" variant="secondary" onClick={() => navigate(`/edit/${list.id}`)}>
+                        <Pencil className="h-4 w-4" /> Edit
+                      </Button>
 
                       {listResults.map((r, i) => (
                         <div key={r.id} className="flex items-center gap-1">

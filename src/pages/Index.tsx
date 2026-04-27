@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Trophy, Library as LibraryIcon, Plus, Play, Eye, ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { Trophy, Library as LibraryIcon, Plus, Play, Eye, ArrowRight, Loader2, Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
@@ -36,7 +36,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [lists, setLists] = useState<ListRow[]>([]);
   const [latestResult, setLatestResult] = useState<ResultRow | null>(null);
-  const [resumable, setResumable] = useState<SessionRow | null>(null);
+  const [inProgress, setInProgress] = useState<SessionRow[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -47,7 +47,7 @@ const Dashboard = () => {
           .select("id, title, description, items, created_at")
           .eq("owner_session_id", sid)
           .order("created_at", { ascending: false })
-          .limit(6),
+          .limit(12),
         supabase
           .from("results")
           .select("id, list_id, short_code, ranked_items, created_at")
@@ -59,18 +59,21 @@ const Dashboard = () => {
           .select("list_id, completed, updated_at")
           .eq("session_id", sid)
           .eq("completed", false)
-          .order("updated_at", { ascending: false })
-          .limit(1),
+          .order("updated_at", { ascending: false }),
       ]);
       setLists((listData ?? []) as any);
       setLatestResult(((resultData ?? [])[0] as any) ?? null);
-      setResumable(((sessionData ?? [])[0] as any) ?? null);
+      setInProgress((sessionData ?? []) as any);
       setLoading(false);
     })();
   }, []);
 
   const latestList = latestResult ? lists.find((l) => l.id === latestResult.list_id) : null;
-  const resumableList = resumable ? lists.find((l) => l.id === resumable.list_id) : null;
+  const inProgressIds = new Set(inProgress.map((s) => s.list_id));
+  const inProgressLists = lists.filter((l) => inProgressIds.has(l.id));
+  const idleLists = lists.filter((l) => !inProgressIds.has(l.id));
+  const mostRecentResumable = inProgressLists[0] ?? null;
+
 
   // Empty state — show a friendly intro with a CTA, not the create flow directly.
   // The create flow lives at /new; clicking the Ranker logo always returns here.
@@ -109,9 +112,12 @@ const Dashboard = () => {
                 <Button onClick={() => navigate("/new")}>
                   <Plus className="h-4 w-4" /> {isEmpty ? "Create your first list" : "New list"}
                 </Button>
-                {resumable && resumableList && (
-                  <Button variant="secondary" onClick={() => navigate("/new?resume=1")}>
-                    <Play className="h-4 w-4" /> Resume "{resumableList.title}"
+                {mostRecentResumable && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate(`/new?resume=1&list=${mostRecentResumable.id}`)}
+                  >
+                    <Play className="h-4 w-4" /> Resume "{mostRecentResumable.title}"
                   </Button>
                 )}
               </div>
@@ -166,31 +172,62 @@ const Dashboard = () => {
               </section>
             )}
 
-            {/* Recent datasets */}
-            {lists.length > 0 && (
+            {/* In progress */}
+            {inProgressLists.length > 0 && (
+              <section className="space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    In progress
+                  </h2>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {inProgressLists.length} session{inProgressLists.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {inProgressLists.slice(0, 4).map((list) => (
+                    <button
+                      key={list.id}
+                      onClick={() => navigate(`/new?resume=1&list=${list.id}`)}
+                      className="group flex flex-col rounded-xl border border-primary/30 bg-primary-soft/40 p-5 text-left shadow-soft transition-shadow ease-settle hover:shadow-lifted"
+                    >
+                      <h3 className="font-semibold text-balance line-clamp-2">{list.title}</h3>
+                      {list.description && (
+                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2 text-pretty">
+                          {list.description}
+                        </p>
+                      )}
+                      <div className="mt-auto flex items-center justify-between pt-4 text-xs tabular-nums">
+                        <span className="text-muted-foreground">{list.items.length} items</span>
+                        <span className="inline-flex items-center gap-1 font-medium text-primary">
+                          <Play className="h-3 w-3" /> Resume
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Datasets (idle / completed) */}
+            {idleLists.length > 0 && (
               <section className="space-y-3">
                 <div className="flex items-baseline justify-between">
                   <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                     Your datasets
                   </h2>
-                  <Link
-                    to="/library"
-                    className="text-xs text-muted-foreground hover:text-foreground"
-                  >
+                  <Link to="/library" className="text-xs text-muted-foreground hover:text-foreground">
                     View all
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {lists.slice(0, 4).map((list) => {
-                    const isResumable = resumable?.list_id === list.id;
-                    const href = isResumable
-                      ? `/new?resume=1&list=${list.id}`
-                      : `/new?list=${list.id}`;
-                    return (
+                  {idleLists.slice(0, 4).map((list) => (
+                    <div
+                      key={list.id}
+                      className="group flex flex-col rounded-xl bg-surface p-5 text-left shadow-soft transition-shadow ease-settle hover:shadow-lifted"
+                    >
                       <button
-                        key={list.id}
-                        onClick={() => navigate(href)}
-                        className="group flex flex-col rounded-xl bg-surface p-5 text-left shadow-soft transition-shadow ease-settle hover:shadow-lifted"
+                        onClick={() => navigate(`/new?list=${list.id}`)}
+                        className="flex flex-1 flex-col text-left"
                       >
                         <h3 className="font-semibold text-balance line-clamp-2">{list.title}</h3>
                         {list.description && (
@@ -200,17 +237,19 @@ const Dashboard = () => {
                         )}
                         <div className="mt-auto flex items-center justify-between pt-4 text-xs text-muted-foreground tabular-nums">
                           <span>{list.items.length} items</span>
-                          {isResumable ? (
-                            <span className="inline-flex items-center gap-1 text-primary">
-                              <Play className="h-3 w-3" /> In progress
-                            </span>
-                          ) : (
-                            <span>{new Date(list.created_at).toLocaleDateString()}</span>
-                          )}
+                          <span>{new Date(list.created_at).toLocaleDateString()}</span>
                         </div>
                       </button>
-                    );
-                  })}
+                      <div className="mt-3 flex gap-2">
+                        <Button size="sm" className="flex-1" onClick={() => navigate(`/new?list=${list.id}`)}>
+                          <Play className="h-3.5 w-3.5" /> Rank
+                        </Button>
+                        <Button size="sm" variant="secondary" onClick={() => navigate(`/edit/${list.id}`)}>
+                          <Pencil className="h-3.5 w-3.5" /> Edit
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </section>
             )}

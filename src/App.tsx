@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound.tsx";
 import SharedResult from "./pages/SharedResult.tsx";
 import Library from "./pages/Library.tsx";
 import NewList from "./pages/NewList.tsx";
+import EditList from "./pages/EditList.tsx";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/new" element={<NewList />} />
           <Route path="/library" element={<Library />} />
+          <Route path="/edit/:id" element={<EditList />} />
           <Route path="/r/:code" element={<SharedResult />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
