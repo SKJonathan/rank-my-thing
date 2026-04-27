@@ -4,7 +4,11 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
+// On GitHub Pages the site lives under /ranker/. Locally and on Lovable hosting it lives at /.
+const isGhPages = process.env.GITHUB_PAGES === "true";
+
 export default defineConfig(({ mode }) => ({
+  base: isGhPages ? "/ranker/" : "/",
   server: {
     host: "::",
     port: 8080,
