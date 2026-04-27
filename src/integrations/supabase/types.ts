@@ -14,7 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          items: Json
+          owner_session_id: string
+          parent_list_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          items: Json
+          owner_session_id: string
+          parent_list_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          items?: Json
+          owner_session_id?: string
+          parent_list_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lists_parent_list_id_fkey"
+            columns: ["parent_list_id"]
+            isOneToOne: false
+            referencedRelation: "lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ranking_sessions: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          list_id: string
+          session_id: string
+          state: Json
+          updated_at: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          list_id: string
+          session_id: string
+          state: Json
+          updated_at?: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          list_id?: string
+          session_id?: string
+          state?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_sessions_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      results: {
+        Row: {
+          created_at: string
+          id: string
+          list_id: string
+          ranked_items: Json
+          ranker_name: string | null
+          session_id: string
+          short_code: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          list_id: string
+          ranked_items: Json
+          ranker_name?: string | null
+          session_id: string
+          short_code: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          list_id?: string
+          ranked_items?: Json
+          ranker_name?: string | null
+          session_id?: string
+          short_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
