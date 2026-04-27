@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Trophy, Library as LibraryIcon, Plus, Play, Eye, ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { Trophy, Library as LibraryIcon, Plus, Play, Eye, ArrowRight, Loader2, Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
@@ -36,7 +36,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [lists, setLists] = useState<ListRow[]>([]);
   const [latestResult, setLatestResult] = useState<ResultRow | null>(null);
-  const [resumable, setResumable] = useState<SessionRow | null>(null);
+  const [inProgress, setInProgress] = useState<SessionRow[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -47,7 +47,7 @@ const Dashboard = () => {
           .select("id, title, description, items, created_at")
           .eq("owner_session_id", sid)
           .order("created_at", { ascending: false })
-          .limit(6),
+          .limit(12),
         supabase
           .from("results")
           .select("id, list_id, short_code, ranked_items, created_at")
@@ -59,18 +59,21 @@ const Dashboard = () => {
           .select("list_id, completed, updated_at")
           .eq("session_id", sid)
           .eq("completed", false)
-          .order("updated_at", { ascending: false })
-          .limit(1),
+          .order("updated_at", { ascending: false }),
       ]);
       setLists((listData ?? []) as any);
       setLatestResult(((resultData ?? [])[0] as any) ?? null);
-      setResumable(((sessionData ?? [])[0] as any) ?? null);
+      setInProgress(((sessionData ?? []) as any) ?? []);
       setLoading(false);
     })();
   }, []);
 
   const latestList = latestResult ? lists.find((l) => l.id === latestResult.list_id) : null;
-  const resumableList = resumable ? lists.find((l) => l.id === resumable.list_id) : null;
+  const inProgressIds = new Set(inProgress.map((s) => s.list_id));
+  const inProgressLists = lists.filter((l) => inProgressIds.has(l.id));
+  const idleLists = lists.filter((l) => !inProgressIds.has(l.id));
+  const mostRecentResumable = inProgressLists[0] ?? null;
+
 
   // Empty state — show a friendly intro with a CTA, not the create flow directly.
   // The create flow lives at /new; clicking the Ranker logo always returns here.
