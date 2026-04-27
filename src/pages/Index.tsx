@@ -110,7 +110,7 @@ const Dashboard = () => {
                   <Plus className="h-4 w-4" /> {isEmpty ? "Create your first list" : "New list"}
                 </Button>
                 {resumable && resumableList && (
-                  <Button variant="secondary" onClick={() => navigate("/new")}>
+                  <Button variant="secondary" onClick={() => navigate("/new?resume=1")}>
                     <Play className="h-4 w-4" /> Resume "{resumableList.title}"
                   </Button>
                 )}

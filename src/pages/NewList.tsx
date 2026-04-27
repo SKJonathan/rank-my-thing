@@ -1,9 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Trophy, Library as LibraryIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RankerApp from "@/components/ranker/RankerApp";
 
 const NewList = () => {
+  const [params] = useSearchParams();
+  const allowResume = params.get("resume") === "1";
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
@@ -22,7 +25,7 @@ const NewList = () => {
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-6 py-12">
-        <RankerApp />
+        <RankerApp allowResume={allowResume} />
       </main>
       <footer className="mt-24 border-t border-border">
         <div className="mx-auto max-w-3xl px-6 py-6 text-xs text-muted-foreground">
