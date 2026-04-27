@@ -14,6 +14,8 @@ import {
 } from "@/lib/ranker";
 import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
+import PreviewButton from "./PreviewButton";
+import { stopPreview } from "@/lib/itunes";
 
 type Item = { id: string; label: string };
 
@@ -70,6 +72,7 @@ export default function Compare({ listId, items, resumeState, resumeSessionRowId
 
   const choose = (c: "a" | "b" | "tie") => {
     if (animating || !pair) return;
+    stopPreview();
     setAnimating(c);
     window.setTimeout(() => {
       setState((prev) => {
@@ -188,6 +191,9 @@ function CardChoice({
         </div>
         <div className="text-2xl md:text-3xl font-semibold text-balance leading-tight">
           {item.label}
+        </div>
+        <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+          <PreviewButton query={item.label} />
         </div>
       </motion.button>
     </AnimatePresence>
