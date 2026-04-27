@@ -183,10 +183,13 @@ const Dashboard = () => {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {lists.slice(0, 4).map((list) => {
                     const isResumable = resumable?.list_id === list.id;
+                    const href = isResumable
+                      ? `/new?resume=1&list=${list.id}`
+                      : `/new?list=${list.id}`;
                     return (
                       <button
                         key={list.id}
-                        onClick={() => navigate("/new")}
+                        onClick={() => navigate(href)}
                         className="group flex flex-col rounded-xl bg-surface p-5 text-left shadow-soft transition-shadow ease-settle hover:shadow-lifted"
                       >
                         <h3 className="font-semibold text-balance line-clamp-2">{list.title}</h3>
