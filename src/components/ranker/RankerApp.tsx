@@ -27,9 +27,10 @@ interface InitialState {
 
 interface Props {
   initial?: InitialState;
+  allowResume?: boolean;
 }
 
-export default function RankerApp({ initial }: Props) {
+export default function RankerApp({ initial, allowResume = false }: Props) {
   const [step, setStep] = useState<Step>(initial?.step ?? "setup");
   const [listId, setListId] = useState<string | null>(initial?.listId ?? null);
   const [items, setItems] = useState<Item[]>(initial?.items ?? []);
@@ -43,9 +44,9 @@ export default function RankerApp({ initial }: Props) {
   const [hasOthers, setHasOthers] = useState(false);
   const [resuming, setResuming] = useState(true);
 
-  // On fresh mount (no initial), check for in-progress session to resume
+  // On fresh mount (no initial), optionally check for in-progress session to resume
   useEffect(() => {
-    if (initial) {
+    if (initial || !allowResume) {
       setResuming(false);
       return;
     }
