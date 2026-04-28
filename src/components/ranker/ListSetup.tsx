@@ -20,7 +20,7 @@ import { getSessionId } from "@/lib/session";
 type Item = { id: string; label: string };
 
 interface Props {
-  onCreated: (listId: string, items: Item[], title: string, description: string, artists: string[]) => void;
+  onCreated: (listId: string, items: Item[], title: string, description: string, artists: string[], category: CategoryId) => void;
 }
 
 function dedupeAndClean(raw: string[]): string[] {
@@ -40,6 +40,7 @@ function dedupeAndClean(raw: string[]): string[] {
 export default function ListSetup({ onCreated }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<CategoryId>(DEFAULT_CATEGORY);
   const [items, setItems] = useState<Item[]>([]);
   const [input, setInput] = useState("");
   const [bulk, setBulk] = useState("");
@@ -48,6 +49,8 @@ export default function ListSetup({ onCreated }: Props) {
   const [artistInput, setArtistInput] = useState("");
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const isMusic = category === "music";
 
   const addArtists = (labels: string[]) => {
     setArtists((prev) => {
