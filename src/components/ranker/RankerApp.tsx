@@ -71,7 +71,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
         const [{ data: list, error: listErr }, { data: session }] = await Promise.all([
           supabase
             .from("lists")
-            .select("id, title, description, items, artists")
+            .select("id, title, description, items, artists, category")
             .eq("id", loadListId)
             .maybeSingle(),
           supabase
@@ -90,6 +90,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
           setTitle(list.title);
           setDescription(list.description ?? "");
           setArtists(((list as any).artists as string[]) ?? []);
+          setCategory(((list as any).category as string) ?? "other");
           if (session && session.state) {
             setResumeState(session.state as unknown as RankerState);
             setResumeRowId(session.id);
@@ -108,7 +109,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
       // allowResume path — pick up the most recent unfinished session across any list
       const { data } = await supabase
         .from("ranking_sessions")
-        .select("id, list_id, state, completed, lists(title, description, items, artists)")
+        .select("id, list_id, state, completed, lists(title, description, items, artists, category)")
         .eq("session_id", sid)
         .eq("completed", false)
         .order("updated_at", { ascending: false })
@@ -121,6 +122,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
         setTitle(list.title);
         setDescription(list.description ?? "");
         setArtists((list.artists as string[]) ?? []);
+        setCategory((list.category as string) ?? "other");
         setResumeState(data.state as unknown as RankerState);
         setResumeRowId(data.id);
         setStep("compare");
