@@ -144,12 +144,13 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
     })();
   }, [step, listId, shortCodeVal, order]);
 
-  const handleCreated = (id: string, its: Item[], t: string, d: string, a: string[] = []) => {
+  const handleCreated = (id: string, its: Item[], t: string, d: string, a: string[] = [], cat: string = "other") => {
     setListId(id);
     setItems(its);
     setTitle(t);
     setDescription(d);
     setArtists(a);
+    setCategory(cat);
     setResumeState(null);
     setResumeRowId(null);
     setStep("compare");
@@ -203,6 +204,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
     setTitle("");
     setDescription("");
     setArtists([]);
+    setCategory("other");
     setOrder([]);
     setResumeState(null);
     setResumeRowId(null);
