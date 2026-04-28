@@ -124,6 +124,7 @@ export default function Compare({ listId, items, artists, resumeState, resumeSes
           item={pair.a}
           side="a"
           state={animating}
+          artists={artists}
           onClick={() => choose("a")}
           disabled={!!animating}
         />
@@ -131,6 +132,7 @@ export default function Compare({ listId, items, artists, resumeState, resumeSes
           item={pair.b}
           side="b"
           state={animating}
+          artists={artists}
           onClick={() => choose("b")}
           disabled={!!animating}
         />
