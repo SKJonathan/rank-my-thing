@@ -1,0 +1,1 @@
+ALTER TABLE public.lists ADD COLUMN IF NOT EXISTS artists text[] NOT NULL DEFAULT '{}'::text[];
