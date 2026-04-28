@@ -86,6 +86,7 @@ function artistMatchScore(resultArtist: string, allowed: string[]): number {
   if (!allowed.length) return 1; // no restriction
   const ra = normalize(resultArtist);
   if (!ra) return -1;
+  const raTokens = tokens(resultArtist);
   let best = -1;
   for (const a of allowed) {
     const na = normalize(a);
@@ -95,8 +96,17 @@ function artistMatchScore(resultArtist: string, allowed: string[]): number {
       best = Math.max(best, 1);
       continue;
     }
-    const overlap = tokenOverlap(resultArtist, a);
-    if (overlap >= 0.5) best = Math.max(best, overlap);
+    // Require ALL tokens of the allowed artist to appear in the result artist
+    // (e.g. "tori kelly" must have both "tori" and "kelly" present).
+    const aTokens = tokens(a);
+    if (aTokens.size === 0) continue;
+    let allPresent = true;
+    aTokens.forEach((t) => {
+      if (!raTokens.has(t)) allPresent = false;
+    });
+    if (allPresent) {
+      best = Math.max(best, 0.9);
+    }
   }
   return best;
 }
