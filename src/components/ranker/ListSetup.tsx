@@ -12,7 +12,7 @@ import { getSessionId } from "@/lib/session";
 type Item = { id: string; label: string };
 
 interface Props {
-  onCreated: (listId: string, items: Item[], title: string, description: string) => void;
+  onCreated: (listId: string, items: Item[], title: string, description: string, artists: string[]) => void;
 }
 
 function dedupeAndClean(raw: string[]): string[] {
