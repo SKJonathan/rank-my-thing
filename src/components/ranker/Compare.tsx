@@ -22,12 +22,13 @@ type Item = { id: string; label: string };
 interface Props {
   listId: string;
   items: Item[];
+  artists?: string[];
   resumeState?: RankerState | null;
   resumeSessionRowId?: string | null;
   onComplete: (orderedIds: string[]) => void;
 }
 
-export default function Compare({ listId, items, resumeState, resumeSessionRowId, onComplete }: Props) {
+export default function Compare({ listId, items, artists, resumeState, resumeSessionRowId, onComplete }: Props) {
   const [state, setState] = useState<RankerState>(() => resumeState ?? createRanker(items));
   const [sessionRowId, setSessionRowId] = useState<string | null>(resumeSessionRowId ?? null);
   const [animating, setAnimating] = useState<null | "a" | "b" | "tie">(null);
@@ -123,6 +124,7 @@ export default function Compare({ listId, items, resumeState, resumeSessionRowId
           item={pair.a}
           side="a"
           state={animating}
+          artists={artists}
           onClick={() => choose("a")}
           disabled={!!animating}
         />
@@ -130,6 +132,7 @@ export default function Compare({ listId, items, resumeState, resumeSessionRowId
           item={pair.b}
           side="b"
           state={animating}
+          artists={artists}
           onClick={() => choose("b")}
           disabled={!!animating}
         />
@@ -151,12 +154,14 @@ function CardChoice({
   item,
   side,
   state,
+  artists,
   onClick,
   disabled,
 }: {
   item: Item;
   side: "a" | "b";
   state: null | "a" | "b" | "tie";
+  artists?: string[];
   onClick: () => void;
   disabled: boolean;
 }) {
@@ -193,7 +198,7 @@ function CardChoice({
           {item.label}
         </div>
         <div className="mt-4" onClick={(e) => e.stopPropagation()}>
-          <PreviewButton query={item.label} />
+          <PreviewButton query={item.label} artists={artists} />
         </div>
       </motion.button>
     </AnimatePresence>

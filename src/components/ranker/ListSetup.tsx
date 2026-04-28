@@ -12,7 +12,7 @@ import { getSessionId } from "@/lib/session";
 type Item = { id: string; label: string };
 
 interface Props {
-  onCreated: (listId: string, items: Item[], title: string, description: string) => void;
+  onCreated: (listId: string, items: Item[], title: string, description: string, artists: string[]) => void;
 }
 
 function dedupeAndClean(raw: string[]): string[] {
@@ -36,8 +36,32 @@ export default function ListSetup({ onCreated }: Props) {
   const [input, setInput] = useState("");
   const [bulk, setBulk] = useState("");
   const [showBulk, setShowBulk] = useState(false);
+  const [artists, setArtists] = useState<string[]>([]);
+  const [artistInput, setArtistInput] = useState("");
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const addArtists = (labels: string[]) => {
+    setArtists((prev) => {
+      const existing = new Set(prev.map((p) => p.toLowerCase()));
+      const fresh = dedupeAndClean(labels).filter((l) => !existing.has(l.toLowerCase()));
+      return [...prev, ...fresh];
+    });
+  };
+
+  const handleArtistKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (artistInput.trim()) {
+        addArtists([artistInput]);
+        setArtistInput("");
+      }
+    }
+  };
+
+  const removeArtist = (name: string) => {
+    setArtists((prev) => prev.filter((a) => a !== name));
+  };
 
   const addItems = (labels: string[]) => {
     setItems((prev) => {
@@ -103,6 +127,7 @@ export default function ListSetup({ onCreated }: Props) {
         title: title.trim(),
         description: description.trim() || null,
         items: items as any,
+        artists: artists,
         owner_session_id: getSessionId(),
       })
       .select()
@@ -112,7 +137,7 @@ export default function ListSetup({ onCreated }: Props) {
       toast.error("Could not save list.");
       return;
     }
-    onCreated(data.id, items, title.trim(), description.trim());
+    onCreated(data.id, items, title.trim(), description.trim(), artists);
   };
 
   return (
@@ -150,6 +175,50 @@ export default function ListSetup({ onCreated }: Props) {
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
           />
+        </div>
+      </div>
+
+      <div className="space-y-3 rounded-xl bg-surface p-6 shadow-soft">
+        <div className="space-y-1">
+          <Label htmlFor="artists">
+            Artists in this dataset{" "}
+            <span className="text-muted-foreground font-normal">(optional)</span>
+          </Label>
+          <p className="text-xs text-muted-foreground">
+            For song lists — restrict the 30s previews so only these artists are searched.
+          </p>
+        </div>
+        <Input
+          id="artists"
+          placeholder="Type an artist, press Enter…"
+          value={artistInput}
+          onChange={(e) => setArtistInput(e.target.value)}
+          onKeyDown={handleArtistKey}
+          className="h-11"
+        />
+        <div className="flex flex-wrap gap-2">
+          <AnimatePresence mode="popLayout">
+            {artists.map((a) => (
+              <motion.button
+                key={a}
+                layout
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                onClick={() => removeArtist(a)}
+                className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-alt px-3 py-1.5 text-sm font-medium hover:bg-primary-soft hover:border-primary/30 transition-colors"
+              >
+                <span>{a}</span>
+                <X className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
+              </motion.button>
+            ))}
+          </AnimatePresence>
+          {artists.length === 0 && (
+            <p className="text-sm text-muted-foreground italic">
+              No artist filter — previews can match any artist.
+            </p>
+          )}
         </div>
       </div>
 
