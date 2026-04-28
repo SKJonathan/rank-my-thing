@@ -79,6 +79,28 @@ export default function EditList() {
     });
   };
 
+  const addArtists = (labels: string[]) => {
+    setArtists((prev) => {
+      const existing = new Set(prev.map((p) => p.toLowerCase()));
+      const fresh = dedupeAndClean(labels).filter((l) => !existing.has(l.toLowerCase()));
+      return [...prev, ...fresh];
+    });
+  };
+
+  const handleArtistKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (artistInput.trim()) {
+        addArtists([artistInput]);
+        setArtistInput("");
+      }
+    }
+  };
+
+  const removeArtist = (name: string) => {
+    setArtists((prev) => prev.filter((a) => a !== name));
+  };
+
   const handleInputKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
