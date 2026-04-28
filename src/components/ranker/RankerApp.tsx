@@ -20,6 +20,7 @@ interface InitialState {
   items: Item[];
   title: string;
   description: string;
+  artists?: string[];
   step: Step;
   initialOrder?: string[];
   resumeState?: RankerState | null;
