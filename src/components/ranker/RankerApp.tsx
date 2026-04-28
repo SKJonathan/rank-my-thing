@@ -21,6 +21,7 @@ interface InitialState {
   title: string;
   description: string;
   artists?: string[];
+  category?: string;
   step: Step;
   initialOrder?: string[];
   resumeState?: RankerState | null;
@@ -43,6 +44,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [artists, setArtists] = useState<string[]>(initial?.artists ?? []);
+  const [category, setCategory] = useState<string>(initial?.category ?? "other");
   const [order, setOrder] = useState<string[]>(initial?.initialOrder ?? []);
   const [resumeState, setResumeState] = useState<RankerState | null>(initial?.resumeState ?? null);
   const [resumeRowId, setResumeRowId] = useState<string | null>(initial?.resumeSessionRowId ?? null);
