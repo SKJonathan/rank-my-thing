@@ -38,6 +38,8 @@ export default function EditList() {
   const [input, setInput] = useState("");
   const [bulk, setBulk] = useState("");
   const [showBulk, setShowBulk] = useState(false);
+  const [artists, setArtists] = useState<string[]>([]);
+  const [artistInput, setArtistInput] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function EditList() {
       const sid = getSessionId();
       const { data } = await supabase
         .from("lists")
-        .select("id, title, description, items, owner_session_id")
+        .select("id, title, description, items, artists, owner_session_id")
         .eq("id", id)
         .maybeSingle();
       if (!data) {
@@ -61,6 +63,7 @@ export default function EditList() {
       }
       setTitle(data.title);
       setDescription(data.description ?? "");
+      setArtists(((data as any).artists as string[]) ?? []);
       const its = (data.items as Item[]) ?? [];
       setItems(its);
       setOriginalItemIds(new Set(its.map((i) => i.id)));
@@ -74,6 +77,28 @@ export default function EditList() {
       const fresh = dedupeAndClean(labels).filter((l) => !existing.has(l.toLowerCase()));
       return [...prev, ...fresh.map((l) => ({ id: crypto.randomUUID(), label: l }))];
     });
+  };
+
+  const addArtists = (labels: string[]) => {
+    setArtists((prev) => {
+      const existing = new Set(prev.map((p) => p.toLowerCase()));
+      const fresh = dedupeAndClean(labels).filter((l) => !existing.has(l.toLowerCase()));
+      return [...prev, ...fresh];
+    });
+  };
+
+  const handleArtistKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (artistInput.trim()) {
+        addArtists([artistInput]);
+        setArtistInput("");
+      }
+    }
+  };
+
+  const removeArtist = (name: string) => {
+    setArtists((prev) => prev.filter((a) => a !== name));
   };
 
   const handleInputKey = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -131,6 +156,7 @@ export default function EditList() {
         title: title.trim(),
         description: description.trim() || null,
         items: items as any,
+        artists: artists,
       })
       .eq("id", id);
 
@@ -209,6 +235,50 @@ export default function EditList() {
                   Description <span className="text-muted-foreground font-normal">(optional)</span>
                 </Label>
                 <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+              </div>
+            </div>
+
+            <div className="space-y-3 rounded-xl bg-surface p-6 shadow-soft">
+              <div className="space-y-1">
+                <Label htmlFor="artists">
+                  Artists in this dataset{" "}
+                  <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  For song lists — restrict the 30s previews so only these artists are searched.
+                </p>
+              </div>
+              <Input
+                id="artists"
+                placeholder="Type an artist, press Enter…"
+                value={artistInput}
+                onChange={(e) => setArtistInput(e.target.value)}
+                onKeyDown={handleArtistKey}
+                className="h-11"
+              />
+              <div className="flex flex-wrap gap-2">
+                <AnimatePresence mode="popLayout">
+                  {artists.map((a) => (
+                    <motion.button
+                      key={a}
+                      layout
+                      initial={{ opacity: 0, scale: 0.85 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                      onClick={() => removeArtist(a)}
+                      className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-alt px-3 py-1.5 text-sm font-medium hover:bg-primary-soft hover:border-primary/30 transition-colors"
+                    >
+                      <span>{a}</span>
+                      <X className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
+                    </motion.button>
+                  ))}
+                </AnimatePresence>
+                {artists.length === 0 && (
+                  <p className="text-sm text-muted-foreground italic">
+                    No artist filter — previews can match any artist.
+                  </p>
+                )}
               </div>
             </div>
 
