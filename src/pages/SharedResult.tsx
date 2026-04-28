@@ -54,6 +54,7 @@ export default function SharedResult() {
               items: data.lists.items,
               title: data.lists.title,
               description: data.lists.description ?? "",
+              artists: data.lists.artists ?? [],
               step: "results",
               initialOrder: data.ranked_items,
               readOnly: true,
