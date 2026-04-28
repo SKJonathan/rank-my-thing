@@ -36,8 +36,32 @@ export default function ListSetup({ onCreated }: Props) {
   const [input, setInput] = useState("");
   const [bulk, setBulk] = useState("");
   const [showBulk, setShowBulk] = useState(false);
+  const [artists, setArtists] = useState<string[]>([]);
+  const [artistInput, setArtistInput] = useState("");
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const addArtists = (labels: string[]) => {
+    setArtists((prev) => {
+      const existing = new Set(prev.map((p) => p.toLowerCase()));
+      const fresh = dedupeAndClean(labels).filter((l) => !existing.has(l.toLowerCase()));
+      return [...prev, ...fresh];
+    });
+  };
+
+  const handleArtistKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      if (artistInput.trim()) {
+        addArtists([artistInput]);
+        setArtistInput("");
+      }
+    }
+  };
+
+  const removeArtist = (name: string) => {
+    setArtists((prev) => prev.filter((a) => a !== name));
+  };
 
   const addItems = (labels: string[]) => {
     setItems((prev) => {
