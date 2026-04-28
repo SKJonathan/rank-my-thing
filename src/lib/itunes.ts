@@ -113,9 +113,14 @@ async function fetchItunes(term: string, limit = 10): Promise<any[]> {
   }
 }
 
-export function searchItunesPreview(query: string): Promise<ItunesPreview | null> {
-  const key = query.trim().toLowerCase();
-  if (!key) return Promise.resolve(null);
+export function searchItunesPreview(
+  query: string,
+  allowedArtists: string[] = [],
+): Promise<ItunesPreview | null> {
+  const cleanedAllowed = allowedArtists.map((a) => a.trim()).filter(Boolean);
+  // Cache key includes the artist allowlist so different lists don't poison each other
+  const key = `${query.trim().toLowerCase()}::${cleanedAllowed.map((a) => a.toLowerCase()).sort().join("|")}`;
+  if (!query.trim()) return Promise.resolve(null);
   if (cache.has(key)) return Promise.resolve(cache.get(key) ?? null);
   if (inflight.has(key)) return inflight.get(key)!;
 
@@ -128,12 +133,19 @@ export function searchItunesPreview(query: string): Promise<ItunesPreview | null
       terms.push(`${parsed.song} ${parsed.artist}`);
       terms.push(`${parsed.artist} ${parsed.song}`);
     }
+    // If we have an artist allowlist, also bias searches toward each allowed artist
+    // paired with the user's label — helps when the label is just the song name.
+    if (cleanedAllowed.length) {
+      for (const a of cleanedAllowed) {
+        terms.push(`${parsed.song ?? parsed.full} ${a}`);
+      }
+    }
     terms.push(parsed.full);
 
     const seen = new Set<string>();
     const candidates: any[] = [];
     for (const t of terms) {
-      const results = await fetchItunes(t, 10);
+      const results = await fetchItunes(t, 15);
       for (const r of results) {
         if (!r?.previewUrl) continue;
         const id = r.trackId ?? `${r.trackName}::${r.artistName}`;
@@ -141,8 +153,8 @@ export function searchItunesPreview(query: string): Promise<ItunesPreview | null
         seen.add(String(id));
         candidates.push(r);
       }
-      // Early exit if we already have a strongly-matching candidate
-      if (candidates.length >= 5) break;
+      // Early exit if we have plenty
+      if (candidates.length >= 20) break;
     }
 
     if (!candidates.length) {
@@ -150,13 +162,27 @@ export function searchItunesPreview(query: string): Promise<ItunesPreview | null
       return null;
     }
 
-    // Pick the best-scoring candidate
+    // Apply artist allowlist as a hard filter when provided
+    let pool = candidates;
+    if (cleanedAllowed.length) {
+      pool = candidates.filter((c) => artistMatchScore(c.artistName ?? "", cleanedAllowed) > 0);
+      if (!pool.length) {
+        cache.set(key, null);
+        return null;
+      }
+    }
+
+    // Pick the best-scoring candidate, with a small artist-match boost
     let best: any = null;
     let bestScore = -Infinity;
-    for (const c of candidates) {
+    for (const c of pool) {
       const s = scoreResult(c, parsed);
-      if (s > bestScore) {
-        bestScore = s;
+      const aBoost = cleanedAllowed.length
+        ? artistMatchScore(c.artistName ?? "", cleanedAllowed) * 0.5
+        : 0;
+      const total = s + aBoost;
+      if (total > bestScore) {
+        bestScore = total;
         best = c;
       }
     }
