@@ -167,8 +167,9 @@ export default function EditList() {
         title: title.trim(),
         description: description.trim() || null,
         items: items as any,
-        artists: artists,
-      })
+        artists: isMusic ? artists : [],
+        category,
+      } as any)
       .eq("id", id);
 
     if (error) {
