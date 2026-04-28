@@ -327,6 +327,7 @@ export default function EditList() {
                 )}
               </div>
             </div>
+            )}
 
             <div className="space-y-4 rounded-xl bg-surface p-6 shadow-soft">
               <div className="flex items-center justify-between">
