@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CATEGORIES, DEFAULT_CATEGORY, type CategoryId } from "@/lib/categories";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
@@ -40,7 +48,9 @@ export default function EditList() {
   const [showBulk, setShowBulk] = useState(false);
   const [artists, setArtists] = useState<string[]>([]);
   const [artistInput, setArtistInput] = useState("");
+  const [category, setCategory] = useState<CategoryId>(DEFAULT_CATEGORY);
   const fileRef = useRef<HTMLInputElement>(null);
+  const isMusic = category === "music";
 
   useEffect(() => {
     if (!id) return;
@@ -48,7 +58,7 @@ export default function EditList() {
       const sid = getSessionId();
       const { data } = await supabase
         .from("lists")
-        .select("id, title, description, items, artists, owner_session_id")
+        .select("id, title, description, items, artists, category, owner_session_id")
         .eq("id", id)
         .maybeSingle();
       if (!data) {
@@ -64,6 +74,7 @@ export default function EditList() {
       setTitle(data.title);
       setDescription(data.description ?? "");
       setArtists(((data as any).artists as string[]) ?? []);
+      setCategory((((data as any).category as CategoryId) ?? DEFAULT_CATEGORY));
       const its = (data.items as Item[]) ?? [];
       setItems(its);
       setOriginalItemIds(new Set(its.map((i) => i.id)));
@@ -156,8 +167,9 @@ export default function EditList() {
         title: title.trim(),
         description: description.trim() || null,
         items: items as any,
-        artists: artists,
-      })
+        artists: isMusic ? artists : [],
+        category,
+      } as any)
       .eq("id", id);
 
     if (error) {
@@ -236,8 +248,27 @@ export default function EditList() {
                 </Label>
                 <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select value={category} onValueChange={(v) => setCategory(v as CategoryId)}>
+                  <SelectTrigger id="category" className="h-11">
+                    <SelectValue placeholder="Choose a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {CATEGORIES.find((c) => c.id === category)?.description}
+                </p>
+              </div>
             </div>
 
+            {isMusic && (
             <div className="space-y-3 rounded-xl bg-surface p-6 shadow-soft">
               <div className="space-y-1">
                 <Label htmlFor="artists">
@@ -296,6 +327,7 @@ export default function EditList() {
                 )}
               </div>
             </div>
+            )}
 
             <div className="space-y-4 rounded-xl bg-surface p-6 shadow-soft">
               <div className="flex items-center justify-between">

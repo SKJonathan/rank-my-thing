@@ -23,12 +23,13 @@ interface Props {
   listId: string;
   items: Item[];
   artists?: string[];
+  enablePreview?: boolean;
   resumeState?: RankerState | null;
   resumeSessionRowId?: string | null;
   onComplete: (orderedIds: string[]) => void;
 }
 
-export default function Compare({ listId, items, artists, resumeState, resumeSessionRowId, onComplete }: Props) {
+export default function Compare({ listId, items, artists, enablePreview = false, resumeState, resumeSessionRowId, onComplete }: Props) {
   const [state, setState] = useState<RankerState>(() => resumeState ?? createRanker(items));
   const [sessionRowId, setSessionRowId] = useState<string | null>(resumeSessionRowId ?? null);
   const [animating, setAnimating] = useState<null | "a" | "b" | "tie">(null);
@@ -125,6 +126,7 @@ export default function Compare({ listId, items, artists, resumeState, resumeSes
           side="a"
           state={animating}
           artists={artists}
+          enablePreview={enablePreview}
           onClick={() => choose("a")}
           disabled={!!animating}
         />
@@ -133,6 +135,7 @@ export default function Compare({ listId, items, artists, resumeState, resumeSes
           side="b"
           state={animating}
           artists={artists}
+          enablePreview={enablePreview}
           onClick={() => choose("b")}
           disabled={!!animating}
         />
@@ -155,6 +158,7 @@ function CardChoice({
   side,
   state,
   artists,
+  enablePreview,
   onClick,
   disabled,
 }: {
@@ -162,6 +166,7 @@ function CardChoice({
   side: "a" | "b";
   state: null | "a" | "b" | "tie";
   artists?: string[];
+  enablePreview?: boolean;
   onClick: () => void;
   disabled: boolean;
 }) {
@@ -197,9 +202,11 @@ function CardChoice({
         <div className="text-2xl md:text-3xl font-semibold text-balance leading-tight">
           {item.label}
         </div>
-        <div className="mt-4" onClick={(e) => e.stopPropagation()}>
-          <PreviewButton query={item.label} artists={artists} />
-        </div>
+        {enablePreview && (
+          <div className="mt-4" onClick={(e) => e.stopPropagation()}>
+            <PreviewButton query={item.label} artists={artists} />
+          </div>
+        )}
       </motion.button>
     </AnimatePresence>
   );

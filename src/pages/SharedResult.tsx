@@ -15,7 +15,7 @@ export default function SharedResult() {
     (async () => {
       const { data: result, error } = await supabase
         .from("results")
-        .select("id, short_code, ranked_items, list_id, lists(id, title, description, items, artists)")
+        .select("id, short_code, ranked_items, list_id, lists(id, title, description, items, artists, category)")
         .eq("short_code", code)
         .maybeSingle();
       if (error || !result || !result.lists) {
@@ -55,6 +55,7 @@ export default function SharedResult() {
               title: data.lists.title,
               description: data.lists.description ?? "",
               artists: data.lists.artists ?? [],
+              category: data.lists.category ?? "other",
               step: "results",
               initialOrder: data.ranked_items,
               readOnly: true,

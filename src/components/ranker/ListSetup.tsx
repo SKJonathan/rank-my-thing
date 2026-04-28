@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CATEGORIES, DEFAULT_CATEGORY, type CategoryId } from "@/lib/categories";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { getSessionId } from "@/lib/session";
@@ -12,7 +20,7 @@ import { getSessionId } from "@/lib/session";
 type Item = { id: string; label: string };
 
 interface Props {
-  onCreated: (listId: string, items: Item[], title: string, description: string, artists: string[]) => void;
+  onCreated: (listId: string, items: Item[], title: string, description: string, artists: string[], category: CategoryId) => void;
 }
 
 function dedupeAndClean(raw: string[]): string[] {
@@ -32,6 +40,7 @@ function dedupeAndClean(raw: string[]): string[] {
 export default function ListSetup({ onCreated }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<CategoryId>(DEFAULT_CATEGORY);
   const [items, setItems] = useState<Item[]>([]);
   const [input, setInput] = useState("");
   const [bulk, setBulk] = useState("");
@@ -40,6 +49,8 @@ export default function ListSetup({ onCreated }: Props) {
   const [artistInput, setArtistInput] = useState("");
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const isMusic = category === "music";
 
   const addArtists = (labels: string[]) => {
     setArtists((prev) => {
@@ -121,15 +132,17 @@ export default function ListSetup({ onCreated }: Props) {
       return;
     }
     setLoading(true);
+    const effectiveArtists = isMusic ? artists : [];
     const { data, error } = await supabase
       .from("lists")
       .insert({
         title: title.trim(),
         description: description.trim() || null,
         items: items as any,
-        artists: artists,
+        artists: effectiveArtists,
+        category,
         owner_session_id: getSessionId(),
-      })
+      } as any)
       .select()
       .single();
     setLoading(false);
@@ -137,7 +150,7 @@ export default function ListSetup({ onCreated }: Props) {
       toast.error("Could not save list.");
       return;
     }
-    onCreated(data.id, items, title.trim(), description.trim(), artists);
+    onCreated(data.id, items, title.trim(), description.trim(), effectiveArtists, category);
   };
 
   return (
@@ -176,8 +189,27 @@ export default function ListSetup({ onCreated }: Props) {
             rows={2}
           />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
+          <Select value={category} onValueChange={(v) => setCategory(v as CategoryId)}>
+            <SelectTrigger id="category" className="h-11">
+              <SelectValue placeholder="Choose a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            {CATEGORIES.find((c) => c.id === category)?.description}
+          </p>
+        </div>
       </div>
 
+      {isMusic && (
       <div className="space-y-3 rounded-xl bg-surface p-6 shadow-soft">
         <div className="space-y-1">
           <Label htmlFor="artists">
@@ -236,6 +268,7 @@ export default function ListSetup({ onCreated }: Props) {
           )}
         </div>
       </div>
+      )}
 
       <div className="space-y-4 rounded-xl bg-surface p-6 shadow-soft">
         <div className="flex items-center justify-between">
