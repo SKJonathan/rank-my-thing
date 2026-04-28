@@ -248,8 +248,27 @@ export default function EditList() {
                 </Label>
                 <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select value={category} onValueChange={(v) => setCategory(v as CategoryId)}>
+                  <SelectTrigger id="category" className="h-11">
+                    <SelectValue placeholder="Choose a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {CATEGORIES.find((c) => c.id === category)?.description}
+                </p>
+              </div>
             </div>
 
+            {isMusic && (
             <div className="space-y-3 rounded-xl bg-surface p-6 shadow-soft">
               <div className="space-y-1">
                 <Label htmlFor="artists">
