@@ -233,6 +233,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
             listId={listId}
             items={items}
             artists={artists}
+            enablePreview={category === "music"}
             resumeState={resumeState}
             resumeSessionRowId={resumeRowId}
             onComplete={handleComplete}
