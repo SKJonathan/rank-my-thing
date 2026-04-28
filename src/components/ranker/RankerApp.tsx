@@ -198,6 +198,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
     setItems([]);
     setTitle("");
     setDescription("");
+    setArtists([]);
     setOrder([]);
     setResumeState(null);
     setResumeRowId(null);
