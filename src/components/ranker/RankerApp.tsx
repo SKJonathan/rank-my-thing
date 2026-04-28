@@ -226,6 +226,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
           <Compare
             listId={listId}
             items={items}
+            artists={artists}
             resumeState={resumeState}
             resumeSessionRowId={resumeRowId}
             onComplete={handleComplete}
