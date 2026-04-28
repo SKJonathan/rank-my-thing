@@ -198,7 +198,7 @@ function CardChoice({
           {item.label}
         </div>
         <div className="mt-4" onClick={(e) => e.stopPropagation()}>
-          <PreviewButton query={item.label} />
+          <PreviewButton query={item.label} artists={artists} />
         </div>
       </motion.button>
     </AnimatePresence>
