@@ -69,7 +69,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
         const [{ data: list, error: listErr }, { data: session }] = await Promise.all([
           supabase
             .from("lists")
-            .select("id, title, description, items")
+            .select("id, title, description, items, artists")
             .eq("id", loadListId)
             .maybeSingle(),
           supabase
@@ -87,6 +87,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
           setItems(list.items as Item[]);
           setTitle(list.title);
           setDescription(list.description ?? "");
+          setArtists(((list as any).artists as string[]) ?? []);
           if (session && session.state) {
             setResumeState(session.state as unknown as RankerState);
             setResumeRowId(session.id);
