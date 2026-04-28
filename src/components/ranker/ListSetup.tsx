@@ -188,14 +188,29 @@ export default function ListSetup({ onCreated }: Props) {
             For song lists — restrict the 30s previews so only these artists are searched.
           </p>
         </div>
-        <Input
-          id="artists"
-          placeholder="Type an artist, press Enter…"
-          value={artistInput}
-          onChange={(e) => setArtistInput(e.target.value)}
-          onKeyDown={handleArtistKey}
-          className="h-11"
-        />
+        <div className="flex gap-2">
+          <Input
+            id="artists"
+            placeholder="Type an artist…"
+            value={artistInput}
+            onChange={(e) => setArtistInput(e.target.value)}
+            onKeyDown={handleArtistKey}
+            className="h-11"
+          />
+          <Button
+            type="button"
+            onClick={() => {
+              if (artistInput.trim()) {
+                addArtists([artistInput]);
+                setArtistInput("");
+              }
+            }}
+            disabled={!artistInput.trim()}
+            className="h-11"
+          >
+            Add
+          </Button>
+        </div>
         <div className="flex flex-wrap gap-2">
           <AnimatePresence mode="popLayout">
             {artists.map((a) => (
