@@ -42,6 +42,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
   const [items, setItems] = useState<Item[]>(initial?.items ?? []);
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
+  const [artists, setArtists] = useState<string[]>(initial?.artists ?? []);
   const [order, setOrder] = useState<string[]>(initial?.initialOrder ?? []);
   const [resumeState, setResumeState] = useState<RankerState | null>(initial?.resumeState ?? null);
   const [resumeRowId, setResumeRowId] = useState<string | null>(initial?.resumeSessionRowId ?? null);
