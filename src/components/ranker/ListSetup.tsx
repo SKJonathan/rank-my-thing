@@ -127,6 +127,7 @@ export default function ListSetup({ onCreated }: Props) {
         title: title.trim(),
         description: description.trim() || null,
         items: items as any,
+        artists: artists,
         owner_session_id: getSessionId(),
       })
       .select()
@@ -136,7 +137,7 @@ export default function ListSetup({ onCreated }: Props) {
       toast.error("Could not save list.");
       return;
     }
-    onCreated(data.id, items, title.trim(), description.trim());
+    onCreated(data.id, items, title.trim(), description.trim(), artists);
   };
 
   return (
