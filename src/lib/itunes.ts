@@ -79,6 +79,28 @@ function scoreResult(
   return tokenOverlap(parsed.full, combined);
 }
 
+// Returns the best-matching allowed artist score for an iTunes result, or -1
+// if none of the allowed artists match well enough. Used to restrict matches
+// to a user-supplied artist allowlist.
+function artistMatchScore(resultArtist: string, allowed: string[]): number {
+  if (!allowed.length) return 1; // no restriction
+  const ra = normalize(resultArtist);
+  if (!ra) return -1;
+  let best = -1;
+  for (const a of allowed) {
+    const na = normalize(a);
+    if (!na) continue;
+    // Exact / containment match wins outright
+    if (ra === na || ra.includes(na) || na.includes(ra)) {
+      best = Math.max(best, 1);
+      continue;
+    }
+    const overlap = tokenOverlap(resultArtist, a);
+    if (overlap >= 0.5) best = Math.max(best, overlap);
+  }
+  return best;
+}
+
 async function fetchItunes(term: string, limit = 10): Promise<any[]> {
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&entity=song&limit=${limit}`;
   try {
