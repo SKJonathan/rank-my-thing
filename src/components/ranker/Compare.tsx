@@ -22,12 +22,13 @@ type Item = { id: string; label: string };
 interface Props {
   listId: string;
   items: Item[];
+  artists?: string[];
   resumeState?: RankerState | null;
   resumeSessionRowId?: string | null;
   onComplete: (orderedIds: string[]) => void;
 }
 
-export default function Compare({ listId, items, resumeState, resumeSessionRowId, onComplete }: Props) {
+export default function Compare({ listId, items, artists, resumeState, resumeSessionRowId, onComplete }: Props) {
   const [state, setState] = useState<RankerState>(() => resumeState ?? createRanker(items));
   const [sessionRowId, setSessionRowId] = useState<string | null>(resumeSessionRowId ?? null);
   const [animating, setAnimating] = useState<null | "a" | "b" | "tie">(null);
