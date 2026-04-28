@@ -11,9 +11,10 @@ import {
 
 interface Props {
   query: string;
+  artists?: string[];
 }
 
-export default function PreviewButton({ query }: Props) {
+export default function PreviewButton({ query, artists }: Props) {
   const [preview, setPreview] = useState<ItunesPreview | null | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [playingUrl, setPlayingUrl] = useState<string | null>(getPlayingUrl());
@@ -22,11 +23,12 @@ export default function PreviewButton({ query }: Props) {
     return subscribePlayback(() => setPlayingUrl(getPlayingUrl()));
   }, []);
 
+  const artistsKey = (artists ?? []).join("|");
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setPreview(undefined);
-    searchItunesPreview(query).then((p) => {
+    searchItunesPreview(query, artists ?? []).then((p) => {
       if (cancelled) return;
       setPreview(p);
       setLoading(false);
@@ -34,7 +36,7 @@ export default function PreviewButton({ query }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [query]);
+  }, [query, artistsKey]);
 
   // Stop any playback when the query changes (e.g. new pair shown)
   useEffect(() => {
