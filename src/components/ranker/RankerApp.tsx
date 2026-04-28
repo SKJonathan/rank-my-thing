@@ -106,7 +106,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
       // allowResume path — pick up the most recent unfinished session across any list
       const { data } = await supabase
         .from("ranking_sessions")
-        .select("id, list_id, state, completed, lists(title, description, items)")
+        .select("id, list_id, state, completed, lists(title, description, items, artists)")
         .eq("session_id", sid)
         .eq("completed", false)
         .order("updated_at", { ascending: false })
@@ -118,6 +118,7 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
         setItems(list.items as Item[]);
         setTitle(list.title);
         setDescription(list.description ?? "");
+        setArtists((list.artists as string[]) ?? []);
         setResumeState(data.state as unknown as RankerState);
         setResumeRowId(data.id);
         setStep("compare");
