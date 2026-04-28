@@ -17,6 +17,7 @@ export type Database = {
       lists: {
         Row: {
           artists: string[]
+          category: string
           created_at: string
           description: string | null
           id: string
@@ -27,6 +28,7 @@ export type Database = {
         }
         Insert: {
           artists?: string[]
+          category?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -37,6 +39,7 @@ export type Database = {
         }
         Update: {
           artists?: string[]
+          category?: string
           created_at?: string
           description?: string | null
           id?: string
