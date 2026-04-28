@@ -140,11 +140,12 @@ export default function RankerApp({ initial, allowResume = false, loadListId = n
     })();
   }, [step, listId, shortCodeVal, order]);
 
-  const handleCreated = (id: string, its: Item[], t: string, d: string) => {
+  const handleCreated = (id: string, its: Item[], t: string, d: string, a: string[] = []) => {
     setListId(id);
     setItems(its);
     setTitle(t);
     setDescription(d);
+    setArtists(a);
     setResumeState(null);
     setResumeRowId(null);
     setStep("compare");
