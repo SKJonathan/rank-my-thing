@@ -38,6 +38,8 @@ export default function EditList() {
   const [input, setInput] = useState("");
   const [bulk, setBulk] = useState("");
   const [showBulk, setShowBulk] = useState(false);
+  const [artists, setArtists] = useState<string[]>([]);
+  const [artistInput, setArtistInput] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function EditList() {
       const sid = getSessionId();
       const { data } = await supabase
         .from("lists")
-        .select("id, title, description, items, owner_session_id")
+        .select("id, title, description, items, artists, owner_session_id")
         .eq("id", id)
         .maybeSingle();
       if (!data) {
@@ -61,6 +63,7 @@ export default function EditList() {
       }
       setTitle(data.title);
       setDescription(data.description ?? "");
+      setArtists(((data as any).artists as string[]) ?? []);
       const its = (data.items as Item[]) ?? [];
       setItems(its);
       setOriginalItemIds(new Set(its.map((i) => i.id)));
@@ -131,6 +134,7 @@ export default function EditList() {
         title: title.trim(),
         description: description.trim() || null,
         items: items as any,
+        artists: artists,
       })
       .eq("id", id);
 
