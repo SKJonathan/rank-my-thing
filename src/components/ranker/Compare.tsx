@@ -154,12 +154,14 @@ function CardChoice({
   item,
   side,
   state,
+  artists,
   onClick,
   disabled,
 }: {
   item: Item;
   side: "a" | "b";
   state: null | "a" | "b" | "tie";
+  artists?: string[];
   onClick: () => void;
   disabled: boolean;
 }) {
